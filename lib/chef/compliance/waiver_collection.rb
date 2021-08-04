@@ -37,7 +37,7 @@ class Chef
         select(&:enabled?).each_with_object([]) { |waiver, arry| arry << waiver.for_inspec }
       end
 
-      # DSL method to enable waiver files.  This matches on the name of the profile being wavied, it
+      # DSL method to enable waiver files.  This matches on the name of the control being waived, it
       # does not match on the filename of the waiver file.
       #
       # @example Specific waiver file in a cookbook

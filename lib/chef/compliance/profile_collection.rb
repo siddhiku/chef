@@ -21,15 +21,27 @@ class Chef
   module Compliance
     class ProfileCollection < Array
 
+      # Event dispatcher for this run.
+      #
+      # @return [Chef::EventDispatch::Dispatcher]
+      #
+      attr_reader :events
+
+      def initialize(events)
+        @events = events
+      end
+
       # Add a profile to the profile collection.  The cookbook_name needs to be determined by the
       # caller and is used in the `include_profile` API to match on.  The path should be the complete
       # path on the host of the inspec.yml file, including the filename.
       #
-      # @param cookbook_name [String]
       # @param path [String]
+      # @param cookbook_name [String]
       #
-      def from_file(cookbook_name, path)
-        self << Profile.from_file(cookbook_name, path)
+      def from_file(path, cookbook_name)
+        new_profile = Profile.from_file(events, path, cookbook_name)
+        self << new_profile
+        events.compliance_profile_loaded(cookbook_name, new_profile.pathname, new_profile.name, path)
       end
 
       # @return [Boolean] if any of the profiles are enabled
@@ -65,21 +77,27 @@ class Chef
       #
       def include_profile(arg)
         (cookbook_name, profile_name) = arg.split("::")
-        profiles = nil
 
-        if profile_name.nil?
-          profiles = select { |profile| /^#{cookbook_name}$/.match?(profile.cookbook_name) }
-          if profiles.empty?
-            raise "No inspec profiles found in cookbooks matching #{cookbook_name}"
-          end
-        else
-          profiles = select { |profile| /^#{cookbook_name}$/.match?(profile.cookbook_name) && /^#{profile_name}$/.match?(profile.name) }
-          if profiles.empty?
-            raise "No inspec profiles matching #{profile_name} found in cookbooks matching #{cookbook_name}"
-          end
+        profile_name = "default" if profile_name.nil?
+
+        profiles = select { |profile| /^#{cookbook_name}$/.match?(profile.cookbook_name) && /^#{profile_name}$/.match?(profile.pathname) }
+
+        if profiles.empty?
+          raise "No inspec profiles matching '#{profile_name}' found in cookbooks matching '#{cookbook_name}'"
         end
 
         profiles.each(&:enable!)
+      end
+
+      HIDDEN_IVARS = [ :@events ].freeze
+
+      # Omit the event object from error output
+      #
+      def inspect
+        ivar_string = (instance_variables.map(&:to_sym) - HIDDEN_IVARS).map do |ivar|
+          "#{ivar}=#{instance_variable_get(ivar).inspect}"
+        end.join(", ")
+        "#<#{self.class}:#{object_id} #{ivar_string}>"
       end
     end
   end

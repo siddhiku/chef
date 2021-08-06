@@ -325,7 +325,7 @@ class Chef
       #
       def load_compliance_from_cookbook(cookbook_name)
         # This identifies profiles by their inspec.yml file, we recurse into subdirs so the profiles may be deeply
-        # nested in a subdir structurre for organization.  You could have profiles inside of profiles but
+        # nested in a subdir structure for organization.  You could have profiles inside of profiles but
         # since that is not coherently defined, you should not.
         #
         each_file_in_cookbook_by_segment(cookbook_name, :compliance, [ "profiles/**/inspec.yml", "profiles/**/inspec.yaml" ]) do |filename|

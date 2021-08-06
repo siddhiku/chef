@@ -20,15 +20,27 @@ class Chef
   module Compliance
     class WaiverCollection < Array
 
+      # Event dispatcher for this run.
+      #
+      # @return [Chef::EventDispatch::Dispatcher]
+      #
+      attr_reader :events
+
+      def initialize(events)
+        @events = events
+      end
+
       # Add a waiver to the waiver collection.  The cookbook_name needs to be determined by the
       # caller and is used in the `include_waiver` API to match on.  The path should be the complete
       # path on the host of the yml file, including the filename.
       #
-      # @param cookbook_name [String]
       # @param path [String]
+      # @param cookbook_name [String]
       #
-      def from_file(cookbook, filename)
-        self << Waiver.from_file(cookbook, filename)
+      def from_file(filename, cookbook_name)
+        new_waiver = Waiver.from_file(events, filename, cookbook_name)
+        self << new_waiver
+        events.compliance_waiver_loaded(cookbook_name, new_waiver.pathname, filename)
       end
 
       # @return [Array<Waiver>] inspec waivers which are enabled in a form suitable to pass to inspec
@@ -58,21 +70,27 @@ class Chef
       #
       def include_waiver(arg)
         (cookbook_name, waiver_name) = arg.split("::")
-        waivers = nil
 
-        if waiver_name.nil?
-          waivers = select { |waiver| /^#{cookbook_name}$/.match?(waiver.cookbook_name) }
-          if waivers.empty?
-            raise "No inspec waivers found in cookbooks matching #{cookbook_name}"
-          end
-        else
-          waivers = select { |waiver| /^#{cookbook_name}$/.match?(waiver.cookbook_name) && /^#{waiver_name}$/.match?(waiver.name) }
-          if waivers.empty?
-            raise "No inspec waivers matching #{waiver_name} found in cookbooks matching #{cookbook_name}"
-          end
+        waiver_name = "default" if waiver_name.nil?
+
+        waivers = select { |waiver| /^#{cookbook_name}$/.match?(waiver.cookbook_name) && /^#{waiver_name}$/.match?(waiver.pathname) }
+
+        if waivers.empty?
+          raise "No inspec waivers matching '#{waiver_name}' found in cookbooks matching '#{cookbook_name}'"
         end
 
         waivers.each(&:enable!)
+      end
+
+      HIDDEN_IVARS = [ :@events ].freeze
+
+      # Omit the event object from error output
+      #
+      def inspect
+        ivar_string = (instance_variables.map(&:to_sym) - HIDDEN_IVARS).map do |ivar|
+          "#{ivar}=#{instance_variable_get(ivar).inspect}"
+        end.join(", ")
+        "#<#{self.class}:#{object_id} #{ivar_string}>"
       end
     end
   end

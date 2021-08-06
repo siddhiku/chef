@@ -212,8 +212,8 @@ class Chef
       @loaded_attributes_hash = {}
       @reboot_info = {}
       @cookbook_compiler = nil
-      @waiver_collection = Chef::Compliance::WaiverCollection.new
-      @profile_collection = Chef::Compliance::ProfileCollection.new
+      @waiver_collection = Chef::Compliance::WaiverCollection.new(events)
+      @profile_collection = Chef::Compliance::ProfileCollection.new(events)
 
       initialize_child_state
     end

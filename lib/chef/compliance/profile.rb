@@ -28,10 +28,21 @@ class Chef
       # @return [String] The name of the cookbook that the profile is in
       attr_reader :cookbook_name
 
-      def initialize(data, path, cookbook_name)
+      # @return [String] the pathname in the cookbook
+      attr_accessor :pathname
+
+      # Event dispatcher for this run.
+      #
+      # @return [Chef::EventDispatch::Dispatcher]
+      #
+      attr_reader :events
+
+      def initialize(events, data, path, cookbook_name)
+        @events = events
         @data = data
         @path = path
         @cookbook_name = cookbook_name
+        @pathname = File.basename(File.dirname(path))
         disable!
         validate!
       end
@@ -57,6 +68,7 @@ class Chef
       # Set the profile to being enabled
       #
       def enable!
+        events.compliance_profile_enabled(cookbook_name, pathname, name, path)
         @enabled = true
       end
 
@@ -72,25 +84,36 @@ class Chef
         { name: name, path: File.dirname(path) }
       end
 
+      HIDDEN_IVARS = [ :@events ].freeze
+
+      # Omit the event object from error output
+      #
+      def inspect
+        ivar_string = (instance_variables.map(&:to_sym) - HIDDEN_IVARS).map do |ivar|
+          "#{ivar}=#{instance_variable_get(ivar).inspect}"
+        end.join(", ")
+        "#<#{self.class}:#{object_id} #{ivar_string}>"
+      end
+
       # Helper to construct a profile object from a hash.  Since the path and
       # cookbook_name are required this is probably not externally useful.
       #
-      def self.from_hash(hash, path, cookbook_name)
-        new(hash, path, cookbook_name)
+      def self.from_hash(events, hash, path, cookbook_name)
+        new(events, hash, path, cookbook_name)
       end
 
-      # Helper to consruct a profile object from a yaml string.  Since the path
+      # Helper to construct a profile object from a yaml string.  Since the path
       # and cookbook_name are required this is probably not externally useful.
       #
-      def self.from_yaml(string, path, cookbook_name)
-        from_hash(YAML.load(string), path, cookbook_name)
+      def self.from_yaml(events, string, path, cookbook_name)
+        from_hash(events, YAML.load(string), path, cookbook_name)
       end
 
       # @param filename [String] full path to the inspec.yml file in the cookbook
       # @param cookbook_name [String] cookbook that the profile is in
       #
-      def self.from_file(filename, cookbook_name)
-        from_yaml(IO.read(filename), filename, cookbook_name)
+      def self.from_file(events, filename, cookbook_name)
+        from_yaml(events, IO.read(filename), filename, cookbook_name)
       end
     end
   end

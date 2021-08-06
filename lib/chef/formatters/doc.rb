@@ -362,6 +362,34 @@ class Chef
         end
       end
 
+      def compliance_load_start
+        start_line("start loading compliance profiles", :red)
+      end
+
+      def compliance_load_complete
+        start_line("done loading compliance profiles", :red)
+      end
+
+      # Called when a compliance profile is found in a cookbook by the cookbook_compiler
+      def compliance_profile_loaded(cookbook_name, pathname, name, path)
+        start_line("profile #{cookbook_name}::#{pathname}", :red)
+      end
+
+      # Called when a compliance wavier is found in a cookbook by the cookbook_compiler
+      def compliance_waiver_loaded(cookbook_name, pathname, path)
+        start_line("waiver #{cookbook_name}::#{pathname}", :red)
+      end
+
+      # Called when a compliance profile is enabled (by include_profile)
+      def compliance_profile_enabled(cookbook_name, pathname, name, path)
+        start_line("enabled profile #{cookbook_name}::#{pathname}", :red)
+      end
+
+      # Called when a compliance wavier is enabled (by include_waiver)
+      def compliance_waiver_enabled(cookbook_name, pathname, path)
+        start_line("enabled waiver #{cookbook_name}::#{pathname}", :red)
+      end
+
       # (see Base#deprecation)
       def deprecation(deprecation, _location = nil)
         if Chef::Config[:treat_deprecation_warnings_as_errors]

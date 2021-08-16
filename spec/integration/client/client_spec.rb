@@ -159,13 +159,13 @@ describe "chef-client" do
 
     if ChefUtils.windows?
       context "and the private key is in the Windows CertStore" do
-        before(:each) do
+        before do
           # install the p12/pfx and make sure the key and password are stored in the registry
           install_certificate_in_store
           create_registry_key
         end
 
-        after(:each) do
+        after do
           # remove the p12/pfx and remove the registry key
           remove_certificate_from_store
           remove_registry_key

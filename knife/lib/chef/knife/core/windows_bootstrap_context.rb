@@ -275,6 +275,7 @@ class Chef
         def bootstrap_certstore_cert_ps
           bootstrap_certstore_cert_ps = <<~EOH
             $pfx_password = New-Object -TypeName PSObject
+            # cspell:disable-next-line
             $pfx_password | Add-Member -MemberType ScriptProperty -Name "Password" -Value { ("~!@#$%^&*_-+=`|\\(){}[<]:;'>,.?/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz".tochararray() | Sort-Object { Get-Random })[0..14] -join '' }
             if (-not (Test-Path HKLM:\\SOFTWARE\\Progress)){
               New-Item -Path "HKLM:\\SOFTWARE\\Progress\\Authenticator" -Force

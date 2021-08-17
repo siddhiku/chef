@@ -25,6 +25,7 @@ require_relative "log"
 require_relative "recipe"
 require_relative "run_context/cookbook_compiler"
 require_relative "event_dispatch/events_output_stream"
+require_relative "compliance/input_collection"
 require_relative "compliance/waiver_collection"
 require_relative "compliance/profile_collection"
 require_relative "train_transport"
@@ -138,6 +139,12 @@ class Chef
     #
     attr_accessor :waiver_collection
 
+    # Handle to the global input_collection of inspec input files for the compliance phase
+    #
+    # @return [Chef::Compliance::inputCollection]
+    #
+    attr_accessor :input_collection
+
     # Pointer back to the Chef::Runner that created this
     #
     attr_accessor :runner
@@ -212,6 +219,7 @@ class Chef
       @loaded_attributes_hash = {}
       @reboot_info = {}
       @cookbook_compiler = nil
+      @input_collection = Chef::Compliance::InputCollection.new(events)
       @waiver_collection = Chef::Compliance::WaiverCollection.new(events)
       @profile_collection = Chef::Compliance::ProfileCollection.new(events)
 
@@ -690,6 +698,8 @@ class Chef
         events=
         has_cookbook_file_in_cookbook?
         has_template_in_cookbook?
+        input_collection
+        input_collection=
         load
         loaded_attribute
         loaded_attributes

@@ -133,8 +133,16 @@ class Chef
         end
       end
 
+      def inputs_from_raw_hash
+        safe_input_collection&.raw_hash || {}
+      end
+
+      def waivers_from_raw_hash
+        safe_waiver_collection&.raw_hash || {}
+      end
+
       def inspec_opts
-        inputs = inputs_from_attributes
+        inputs = inputs_from_attributes.merge(inputs_from_raw_hash).merge(waivers_from_raw_hash)
 
         if node["audit"]["chef_node_attribute_enabled"]
           inputs["chef_node"] = node.to_h
@@ -145,13 +153,21 @@ class Chef
           backend_cache: node["audit"]["inspec_backend_cache"],
           inputs: inputs,
           logger: logger,
+          # output: STDOUT,
           output: node["audit"]["quiet"] ? ::File::NULL : STDOUT,
           report: true,
           reporter: ["json-automate"],
+          # reporter: ["cli"],
           reporter_backtrace_inclusion: node["audit"]["result_include_backtrace"],
           reporter_message_truncation: node["audit"]["result_message_limit"],
           waiver_file: waiver_files,
+          input_file: input_files,
         }
+      end
+
+      def input_files
+        # the audit cookbook never supported input _files_ being specified via attributes
+        safe_input_collection&.for_inspec || []
       end
 
       def waiver_files
@@ -346,6 +362,10 @@ class Chef
 
       def safe_waiver_collection
         run_context&.waiver_collection
+      end
+
+      def safe_input_collection
+        run_context&.input_collection
       end
     end
   end

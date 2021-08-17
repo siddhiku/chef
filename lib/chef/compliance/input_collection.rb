@@ -14,11 +14,11 @@
 # limitations under the License.
 #
 
-require_relative "waiver"
+require_relative "input"
 
 class Chef
   module Compliance
-    class WaiverCollection < Array
+    class InputCollection < Array
 
       # Event dispatcher for this run.
       #
@@ -34,62 +34,62 @@ class Chef
         @raw_hash = {}
       end
 
-      # Add a waiver to the waiver collection.  The cookbook_name needs to be determined by the
-      # caller and is used in the `include_waiver` API to match on.  The path should be the complete
+      # Add a input to the input collection.  The cookbook_name needs to be determined by the
+      # caller and is used in the `include_input` API to match on.  The path should be the complete
       # path on the host of the yml file, including the filename.
       #
       # @param path [String]
       # @param cookbook_name [String]
       #
       def from_file(filename, cookbook_name)
-        new_waiver = Waiver.from_file(events, filename, cookbook_name)
-        self << new_waiver
-        events.compliance_waiver_loaded(cookbook_name, new_waiver.pathname, filename)
+        new_input = Input.from_file(events, filename, cookbook_name)
+        self << new_input
+        events.compliance_input_loaded(cookbook_name, new_input.pathname, filename)
       end
 
-      # @return [Array<Waiver>] inspec waivers which are enabled in a form suitable to pass to inspec
+      # @return [Array<Input>] inspec inputs which are enabled in a form suitable to pass to inspec
       #
       def for_inspec
-        select(&:enabled?).each_with_object([]) { |waiver, arry| arry << waiver.for_inspec }
+        select(&:enabled?).each_with_object([]) { |input, arry| arry << input.for_inspec }
       end
 
-      # DSL method to enable waiver files.  This matches on the name of the control being waived, it
-      # does not match on the filename of the waiver file.
+      # DSL method to enable input files.  This matches on the name of the control being waived, it
+      # does not match on the filename of the input file.
       #
-      # @example Specific waiver file in a cookbook
+      # @example Specific input file in a cookbook
       #
-      # include_waiver "acme_cookbook::ssh-001"
+      # include_input "acme_cookbook::ssh-001"
       #
-      # @example Every waiver file in a cookbook
+      # @example Every input file in a cookbook
       #
-      # include_waiver "acme_cookbook"
+      # include_input "acme_cookbook"
       #
-      # @example Matching waivers by regexp in a cookbook
+      # @example Matching inputs by regexp in a cookbook
       #
-      # include_waiver "acme_cookbook::ssh.*"
+      # include_input "acme_cookbook::ssh.*"
       #
-      # @example Matching waivers by regexp in any cookbook in the cookbook collection
+      # @example Matching inputs by regexp in any cookbook in the cookbook collection
       #
-      # include_waiver ".*::ssh.*"
+      # include_input ".*::ssh.*"
       #
-      def include_waiver(arg)
+      def include_input(arg)
         # if we're given a hash argument just shove it in the raw_hash
         if arg.is_a?(Hash)
           raw_hash.merge!(arg)
           return
         end
 
-        (cookbook_name, waiver_name) = arg.split("::")
+        (cookbook_name, input_name) = arg.split("::")
 
-        waiver_name = "default" if waiver_name.nil?
+        input_name = "default" if input_name.nil?
 
-        waivers = select { |waiver| /^#{cookbook_name}$/.match?(waiver.cookbook_name) && /^#{waiver_name}$/.match?(waiver.pathname) }
+        inputs = select { |input| /^#{cookbook_name}$/.match?(input.cookbook_name) && /^#{input_name}$/.match?(input.pathname) }
 
-        if waivers.empty?
-          raise "No inspec waivers matching '#{waiver_name}' found in cookbooks matching '#{cookbook_name}'"
+        if inputs.empty?
+          raise "No inspec inputs matching '#{input_name}' found in cookbooks matching '#{cookbook_name}'"
         end
 
-        waivers.each(&:enable!)
+        inputs.each(&:enable!)
       end
 
       HIDDEN_IVARS = [ :@events ].freeze

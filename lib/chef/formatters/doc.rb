@@ -362,32 +362,45 @@ class Chef
         end
       end
 
-      def compliance_load_start
-        start_line("start loading compliance profiles", :red)
+      # Called when compliance profile loading starts
+      def profiles_load_start
+        puts_line("Loading Inspec profile files:")
       end
 
-      def compliance_load_complete
-        start_line("done loading compliance profiles", :red)
+      # Called when compliance input loading starts
+      def inputs_load_start
+        puts_line("Loading Inspec input files:")
+      end
+
+      # Called when compliance waiver loading starts
+      def waivers_load_start
+        puts_line("Loading Inspec waiver files:")
       end
 
       # Called when a compliance profile is found in a cookbook by the cookbook_compiler
-      def compliance_profile_loaded(cookbook_name, pathname, name, path)
-        start_line("profile #{cookbook_name}::#{pathname}", :red)
+      def compliance_profile_loaded(cookbook_name, path, pathname, name, version)
+        start_line("  - #{cookbook_name}::#{pathname}", :cyan)
+        puts " (#{version})", :cyan if version
       end
 
-      # Called when a compliance wavier is found in a cookbook by the cookbook_compiler
+      # Called when a compliance waiver is found in a cookbook by the cookbook_compiler
+      def compliance_input_loaded(cookbook_name, pathname, path)
+        puts_line("  - #{cookbook_name}::#{pathname}", :cyan)
+      end
+
+      # Called when a compliance waiver is found in a cookbook by the cookbook_compiler
       def compliance_waiver_loaded(cookbook_name, pathname, path)
-        start_line("waiver #{cookbook_name}::#{pathname}", :red)
+        puts_line("  - #{cookbook_name}::#{pathname}", :cyan)
       end
 
       # Called when a compliance profile is enabled (by include_profile)
       def compliance_profile_enabled(cookbook_name, pathname, name, path)
-        start_line("enabled profile #{cookbook_name}::#{pathname}", :red)
+        # puts_line("  * FIXME", :cyan)
       end
 
-      # Called when a compliance wavier is enabled (by include_waiver)
+      # Called when a compliance waiver is enabled (by include_waiver)
       def compliance_waiver_enabled(cookbook_name, pathname, path)
-        start_line("enabled waiver #{cookbook_name}::#{pathname}", :red)
+        # puts_line("  * FIXME", :cyan)
       end
 
       # (see Base#deprecation)

@@ -67,6 +67,15 @@ class Chef
         run_context.waiver_collection
       end
 
+      # The global input_collection hanging off of the run_context, used by
+      # compile_compliance and the compliance phase that runs inspec
+      #
+      # @returns [Chef::Compliance::inputCollection]
+      #
+      def input_collection
+        run_context.input_collection
+      end
+
       # The global profile_collection hanging off of the run_context, used by
       # compile_compliance and the compliance phase that runs inspec
       #
@@ -161,9 +170,21 @@ class Chef
       #
       def compile_compliance
         @events.compliance_load_start
+        @events.profiles_load_start
         cookbook_order.each do |cookbook|
-          load_compliance_from_cookbook(cookbook)
+          load_profiles_from_cookbook(cookbook)
         end
+        @events.profiles_load_complete
+        @events.inputs_load_start
+        cookbook_order.each do |cookbook|
+          load_inputs_from_cookbook(cookbook)
+        end
+        @events.inputs_load_complete
+        @events.waivers_load_start
+        cookbook_order.each do |cookbook|
+          load_waivers_from_cookbook(cookbook)
+        end
+        @events.waivers_load_complete
         @events.compliance_load_complete
       end
 
@@ -323,20 +344,31 @@ class Chef
 
       # Load the compliance segment files from a single cookbook
       #
-      def load_compliance_from_cookbook(cookbook_name)
+      def load_profiles_from_cookbook(cookbook_name)
         # This identifies profiles by their inspec.yml file, we recurse into subdirs so the profiles may be deeply
         # nested in a subdir structure for organization.  You could have profiles inside of profiles but
         # since that is not coherently defined, you should not.
         #
-        each_file_in_cookbook_by_segment(cookbook_name, :compliance, [ "profiles/**/inspec.yml", "profiles/**/inspec.yaml" ]) do |filename|
+        each_file_in_cookbook_by_segment(cookbook_name, :compliance, [ "profiles/**/inspec.{yml,yaml}" ]) do |filename|
           profile_collection.from_file(filename, cookbook_name)
         end
+      end
 
+      def load_waivers_from_cookbook(cookbook_name)
         # This identifies waiver files as any yaml files under the waivers subdir.  We recurse into subdirs as well
         # so that waivers may be nested in subdirs for organization.  Any other files are ignored.
         #
-        each_file_in_cookbook_by_segment(cookbook_name, :compliance, [ "waivers/**/*.yml", "waivers/**/*.yaml" ]) do |filename|
+        each_file_in_cookbook_by_segment(cookbook_name, :compliance, [ "waivers/**/*.{yml,yaml}" ]) do |filename|
           waiver_collection.from_file(filename, cookbook_name)
+        end
+      end
+
+      def load_inputs_from_cookbook(cookbook_name)
+        # This identifies input files as any yaml files under the inputs subdir.  We recurse into subdirs as well
+        # so that inputs may be nested in subdirs for organization.  Any other files are ignored.
+        #
+        each_file_in_cookbook_by_segment(cookbook_name, :compliance, [ "inputs/**/*.{yml,yaml}" ]) do |filename|
+          input_collection.from_file(filename, cookbook_name)
         end
       end
 

@@ -13,26 +13,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+require_relative "toml"
+require_relative "../json_compat"
+autoload :YAML, "yaml"
 
 class Chef
   module DSL
-    module Compliance
+    module ReaderHelpers
 
-      # @see Chef::Compliance::ProfileCollection#include_profile
-      def include_profile(*args)
-        run_context.profile_collection.include_profile(*args)
+      def parse_file(filename)
+        case File.extname(filename)
+        when ".toml"
+          parse_toml(filename)
+        when ".yaml", ".yml"
+          parse_yaml(filename)
+        when ".json"
+          parse_json(filename)
+        end
       end
 
-      # @see Chef::Compliance::WaiverCollection#include_waiver
-      def include_waiver(*args)
-        run_context.waiver_collection.include_waiver(*args)
-      end
+      def parse_json(filename); end
 
-      # @see Chef::Compliance::inputCollection#include_input
-      def include_input(*args)
-        run_context.input_collection.include_input(*args)
-      end
+      def parse_toml(filename); end
+
+      def parse_yaml(filename); end
+
+      extend self
     end
   end
 end

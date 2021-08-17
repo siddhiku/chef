@@ -15,72 +15,61 @@
 # limitations under the License.
 #
 
+require "yaml"
+
 class Chef
   module Compliance
-    class Profile
-      # @return [Boolean] if the profile has been enabled
+    class Input
+      # @return [Boolean] if the input has been enabled
       attr_accessor :enabled
 
-      # @return [String] The full path on the host to the profile inspec.yml
-      attr_reader :path
+      # @return [String] The name of the cookbook that the input is in
+      attr_accessor :cookbook_name
 
-      # @return [String] The name of the cookbook that the profile is in
-      attr_reader :cookbook_name
+      # @return [String] The full path on the host to the input yml file
+      attr_accessor :path
 
       # @return [String] the pathname in the cookbook
       attr_accessor :pathname
 
-      # @return [Chef::EventDispatch::Dispatcher] Event dispatcher for this run.
-      attr_reader :events
+      # Event dispatcher for this run.
+      #
+      # @return [Chef::EventDispatch::Dispatcher]
+      #
+      attr_accessor :events
 
       def initialize(events, data, path, cookbook_name)
         @events = events
         @data = data
-        @path = path
         @cookbook_name = cookbook_name
-        @pathname = File.basename(File.dirname(path))
+        @path = path
+        @pathname = File.basename(path, File.extname(path))
         disable!
-        validate!
       end
 
-      # @return [String] name of the inspec profile from parsing the inspec.yml
-      def name
-        @data["name"]
-      end
-
-      # @return [String] version of the inspec profile from parsing the inspec.yml
-      def version
-        @data["version"]
-      end
-
-      # Raises if the inspec profile is not valid.
+      # @return [Boolean] if the input has been enabled
       #
-      def validate!
-        raise "Inspec profile at #{path} has no name" unless name
-      end
-
-      # @return [Boolean] if the profile has been enabled
       def enabled?
         !!@enabled
       end
 
-      # Set the profile to being enabled
+      # Set the input to being enabled
       #
       def enable!
-        events.compliance_profile_enabled(cookbook_name, pathname, name, path)
+        events.compliance_input_enabled(cookbook_name, pathname, path)
         @enabled = true
       end
 
-      # Set the profile as being disabled
+      # Set the input as being disabled
       #
       def disable!
         @enabled = false
       end
 
-      # Render the profile in a way that it can be consumed by inspec
+      # Render the input in a way that it can be consumed by inspec
       #
       def for_inspec
-        { name: name, path: File.dirname(path) }
+        path
       end
 
       HIDDEN_IVARS = [ :@events ].freeze
@@ -94,22 +83,22 @@ class Chef
         "#<#{self.class}:#{object_id} #{ivar_string}>"
       end
 
-      # Helper to construct a profile object from a hash.  Since the path and
+      # Helper to construct a input object from a hash.  Since the path and
       # cookbook_name are required this is probably not externally useful.
       #
       def self.from_hash(events, hash, path, cookbook_name)
         new(events, hash, path, cookbook_name)
       end
 
-      # Helper to construct a profile object from a yaml string.  Since the path
+      # Helper to construct a input object from a yaml string.  Since the path
       # and cookbook_name are required this is probably not externally useful.
       #
       def self.from_yaml(events, string, path, cookbook_name)
         from_hash(events, YAML.load(string), path, cookbook_name)
       end
 
-      # @param filename [String] full path to the inspec.yml file in the cookbook
-      # @param cookbook_name [String] cookbook that the profile is in
+      # @param filename [String] full path to the yml file in the cookbook
+      # @param cookbook_name [String] cookbook that the input is in
       #
       def self.from_file(events, filename, cookbook_name)
         from_yaml(events, IO.read(filename), filename, cookbook_name)

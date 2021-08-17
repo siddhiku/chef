@@ -22,67 +22,56 @@ class Chef
       provides :inspec_input
       unified_mode true
 
-      description "Use the **inspec_waiver** resource to add a waiver to the Compliance Phase."
+      description "Use the **inspec_input** resource to add an input to the Compliance Phase."
       introduced "17.4"
       examples <<~DOC
-      **Add an InSpec waiver to the Compliance Phase**:
+      **Add an InSpec input to the Compliance Phase**:
 
       ```ruby
-        inspec_waiver 'Add waiver entry for control' do
-          control 'my_inspec_control_01'
-          run_test false
-          justification "The subject of this control is not managed by #{ChefUtils::Dist::Infra::PRODUCT} on the systems in policy group \#{node['policy_group']}"
-          expiration '2022-01-01'
-          action :add
+        inspec_input { ssh_custom_path: '/whatever2' }
+      ```
+
+      **Add an InSpec waiver to the Compliance Phase using the 'name' property to identify the input**:
+
+      ```ruby
+        inspec_input "setting my input" do
+          source( { ssh_custom_path: '/whatever2' })
         end
       ```
 
-      **Add an InSpec waiver to the Compliance Phase using the 'name' property to identify the control**:
+      **Add an InSpec waiver to the Compliance Phase using a TOML, JSON or YAML file**:
 
       ```ruby
-        inspec_waiver 'my_inspec_control_01' do
-          justification "The subject of this control is not managed by #{ChefUtils::Dist::Infra::PRODUCT} on the systems in policy group \#{node['policy_group']}"
-          action :add
+        inspec_input "/path/to/my/input.yml"
+      ```
+
+      **Add an InSpec waiver to the Compliance Phase using a TOML, JSON or YAML file, using the 'name' property**:
+
+      ```ruby
+        inspec_input "setting my input" do
+          source "/path/to/my/input.yml"
         end
       ```
       DOC
 
-      property :control, String,
-        name_property: true,
-        description: "The name of the control being waived"
+      property :name, [ Hash, String ]
 
-      property :expiration, String,
-        description: "The expiration date of the waiver - provided in YYYY-MM-DD format",
-        callbacks: {
-          "Expiration date should be a valid calendar date and match the following format: YYYY-MM-DD" => proc { |e|
-            re = Regexp.new('\d{4}-\d{2}-\d{2}$').freeze
-            if re.match?(e)
-              Date.valid_date?(*e.split("-").map(&:to_i))
-            else
-              e.nil?
-            end
-          },
-        }
-
-      property :run_test, [true, false],
-        description: "If present and true, the control will run and be reported, but failures in it won’t make the overall run fail. If absent or false, the control will not be run."
-
-      property :justification, String,
-        description: "Can be any text you want and might include a reason for the waiver as well as who signed off on the waiver."
+      property :source, [ Hash, String ],
+        name_property: true
 
       action :add do
-        if new_resource.justification.nil? || new_resource.justification == ""
-          raise Chef::Exceptions::ValidationFailed, "Entries for an InSpec waiver must have a justification given, this parameter must have a value."
+        include_input(input_hash)
+      end
+
+      action_class do
+        def input_hash
+          case new_resource.source
+          when Hash
+            new_resource.source
+          when String
+            parse_file(new_resource.source)
+          end
         end
-
-        control_hash = {}
-        control_hash["expiration_date"] = new_resource.expiration.to_s unless new_resource.expiration.nil?
-        control_hash["run"] = new_resource.run_test unless new_resource.run_test.nil?
-        control_hash["justification"] = new_resource.justification.to_s
-
-        waiver_hash = { new_resource.control => control_hash }
-
-        include_waiver(waiver_hash)
       end
     end
   end

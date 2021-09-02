@@ -190,3 +190,7 @@ windows_update_settings "Disable Windows Update" do
   block_windows_update_website true
   disable_automatic_updates true
 end
+
+windows_feature_powershell "RSAT-AD-PowerShell" do
+  action :install
+end

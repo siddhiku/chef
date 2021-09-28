@@ -27,66 +27,66 @@ class Chef
       description "Use the **chef_client_config** resource to create a client.rb file in the #{ChefUtils::Dist::Infra::PRODUCT} configuration directory. See the [client.rb docs](https://docs.chef.io/config_rb_client/) for more details on options available in the client.rb configuration file."
       introduced "16.6"
       examples <<~DOC
-      **Bare minimum #{ChefUtils::Dist::Infra::PRODUCT} client.rb**:
+        **Bare minimum #{ChefUtils::Dist::Infra::PRODUCT} client.rb**:
 
-      The absolute minimum configuration necessary for a node to communicate with the #{ChefUtils::Dist::Server::PRODUCT} is the URL of the #{ChefUtils::Dist::Server::PRODUCT}. All other configuration options either have values at the server side (Policyfiles, Roles, Environments, etc) or have default values determined at client startup.
+        The absolute minimum configuration necessary for a node to communicate with the #{ChefUtils::Dist::Server::PRODUCT} is the URL of the #{ChefUtils::Dist::Server::PRODUCT}. All other configuration options either have values at the server side (Policyfiles, Roles, Environments, etc) or have default values determined at client startup.
 
-      ```ruby
-      chef_client_config 'Create client.rb' do
-        chef_server_url 'https://chef.example.dmz'
-      end
-      ```
+        ```ruby
+        chef_client_config 'Create client.rb' do
+          chef_server_url 'https://chef.example.dmz'
+        end
+        ```
 
-      **More complex #{ChefUtils::Dist::Infra::PRODUCT} client.rb**:
+        **More complex #{ChefUtils::Dist::Infra::PRODUCT} client.rb**:
 
-      ```ruby
-      chef_client_config 'Create client.rb' do
-        chef_server_url 'https://chef.example.dmz'
-        log_level :info
-        log_location :syslog
-        http_proxy 'proxy.example.dmz'
-        https_proxy 'proxy.example.dmz'
-        no_proxy %w(internal.example.dmz)
-      end
-      ```
+        ```ruby
+        chef_client_config 'Create client.rb' do
+          chef_server_url 'https://chef.example.dmz'
+          log_level :info
+          log_location :syslog
+          http_proxy 'proxy.example.dmz'
+          https_proxy 'proxy.example.dmz'
+          no_proxy %w(internal.example.dmz)
+        end
+        ```
 
-      **Adding additional config content to the client.rb**:
+        **Adding additional config content to the client.rb**:
 
-      This resource aims to provide common configuration options. Some configuration options are missing and some users may want to use arbitrary Ruby code within their configuration. For this we offer an `additional_config` property that can be used to add any configuration or code to the bottom of the `client.rb` file. Also keep in mind that within the configuration directory is a `client.d` directory where you can put additional `.rb` files containing configuration options. These can be created using `file` or `template` resources within your cookbooks as necessary.
+        This resource aims to provide common configuration options. Some configuration options are missing and some users may want to use arbitrary Ruby code within their configuration. For this we offer an `additional_config` property that can be used to add any configuration or code to the bottom of the `client.rb` file. Also keep in mind that within the configuration directory is a `client.d` directory where you can put additional `.rb` files containing configuration options. These can be created using `file` or `template` resources within your cookbooks as necessary.
 
-      ```ruby
-      chef_client_config 'Create client.rb' do
-        chef_server_url 'https://chef.example.dmz'
-        additional_config <<~CONFIG
-          # Extra config code to safely load a gem into the client run.
-          # Since the config is Ruby you can run any Ruby code you want via the client.rb.
-          # It's a great way to break things, so be careful
-          begin
-            require 'aws-sdk'
-          rescue LoadError
-            Chef::Log.warn "Failed to load aws-sdk."
-          end
-        CONFIG
-      end
-      ```
+        ```ruby
+        chef_client_config 'Create client.rb' do
+          chef_server_url 'https://chef.example.dmz'
+          additional_config <<~CONFIG
+            # Extra config code to safely load a gem into the client run.
+            # Since the config is Ruby you can run any Ruby code you want via the client.rb.
+            # It's a great way to break things, so be careful
+            begin
+              require 'aws-sdk'
+            rescue LoadError
+              Chef::Log.warn "Failed to load aws-sdk."
+            end
+          CONFIG
+        end
+        ```
 
-      **Setup two report handlers in the client.rb**:
+        **Setup two report handlers in the client.rb**:
 
-      ```ruby
-      chef_client_config 'Create client.rb' do
-        chef_server_url 'https://chef.example.dmz'
-        report_handlers [
-          {
-           'class' => 'ReportHandler1Class',
-           'arguments' => ["'FirstArgument'", "'SecondArgument'"],
-          },
-          {
-           'class' => 'ReportHandler2Class',
-           'arguments' => ["'FirstArgument'", "'SecondArgument'"],
-          },
-        ]
-      end
-      ```
+        ```ruby
+        chef_client_config 'Create client.rb' do
+          chef_server_url 'https://chef.example.dmz'
+          report_handlers [
+            {
+             'class' => 'ReportHandler1Class',
+             'arguments' => ["'FirstArgument'", "'SecondArgument'"],
+            },
+            {
+             'class' => 'ReportHandler2Class',
+             'arguments' => ["'FirstArgument'", "'SecondArgument'"],
+            },
+          ]
+        end
+        ```
       DOC
 
       # @todo policy_file or policy_group being set requires the other to be set so enforce that.
@@ -132,10 +132,10 @@ class Chef
         equal_to: %i{verify_none verify_peer},
         coerce: proc { |x| string_to_symbol(x) },
         description: <<~DESC
-        Set the verify mode for HTTPS requests.
+          Set the verify mode for HTTPS requests.
 
-        * Use :verify_none for no validation of SSL certificates.
-        * Use :verify_peer for validation of all SSL certificates, including the #{ChefUtils::Dist::Server::PRODUCT} connections, S3 connections, and any HTTPS remote_file resource URLs used in #{ChefUtils::Dist::Infra::PRODUCT} runs. This is the recommended setting.
+          * Use :verify_none for no validation of SSL certificates.
+          * Use :verify_peer for validation of all SSL certificates, including the #{ChefUtils::Dist::Server::PRODUCT} connections, S3 connections, and any HTTPS remote_file resource URLs used in #{ChefUtils::Dist::Infra::PRODUCT} runs. This is the recommended setting.
         DESC
 
       property :formatters, Array,

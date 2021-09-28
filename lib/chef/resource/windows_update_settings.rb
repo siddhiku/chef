@@ -30,20 +30,20 @@ class Chef
       description "Use the **windows_update_settings** resource to manage the various Windows Update patching options."
       introduced "17.3"
       examples <<~DOC
-      **Set Windows Update settings**:
+        **Set Windows Update settings**:
 
-      ```ruby
-      windows_update_settings 'Settings to Configure Windows Nodes to automatically receive updates' do
-        disable_os_upgrades true
-        elevate_non_admins true
-        block_windows_update_website true
-        automatically_install_minor_updates true
-        scheduled_install_day 'Friday'
-        scheduled_install_hour 18
-        update_other_ms_products true
-        action :enable
-      end
-      ```
+        ```ruby
+        windows_update_settings 'Settings to Configure Windows Nodes to automatically receive updates' do
+          disable_os_upgrades true
+          elevate_non_admins true
+          block_windows_update_website true
+          automatically_install_minor_updates true
+          scheduled_install_day 'Friday'
+          scheduled_install_hour 18
+          update_other_ms_products true
+          action :enable
+        end
+        ```
       DOC
 
       # required for the alias to pass validation

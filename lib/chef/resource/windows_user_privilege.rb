@@ -29,54 +29,54 @@ class Chef
       introduced "16.0"
 
       examples <<~DOC
-      **Set the SeNetworkLogonRight Privilege for the Builtin Administrators Group and Authenticated Users**:
+        **Set the SeNetworkLogonRight Privilege for the Builtin Administrators Group and Authenticated Users**:
 
-      ```ruby
-      windows_user_privilege 'Network Logon Rights' do
-        privilege      'SeNetworkLogonRight'
-        users          ['BUILTIN\\Administrators', 'NT AUTHORITY\\Authenticated Users']
-        action         :set
-      end
-      ```
+        ```ruby
+        windows_user_privilege 'Network Logon Rights' do
+          privilege      'SeNetworkLogonRight'
+          users          ['BUILTIN\\Administrators', 'NT AUTHORITY\\Authenticated Users']
+          action         :set
+        end
+        ```
 
-      **Add the SeDenyRemoteInteractiveLogonRight Privilege to the Builtin Guests and Local Accounts User Groups**:
+        **Add the SeDenyRemoteInteractiveLogonRight Privilege to the Builtin Guests and Local Accounts User Groups**:
 
-      ```ruby
-      windows_user_privilege 'Remote interactive logon' do
-        privilege      'SeDenyRemoteInteractiveLogonRight'
-        users          ['Builtin\\Guests', 'NT AUTHORITY\\Local Account']
-        action         :add
-      end
-      ```
+        ```ruby
+        windows_user_privilege 'Remote interactive logon' do
+          privilege      'SeDenyRemoteInteractiveLogonRight'
+          users          ['Builtin\\Guests', 'NT AUTHORITY\\Local Account']
+          action         :add
+        end
+        ```
 
-      **Provide only the Builtin Guests and Administrator Groups with the SeCreatePageFile Privilege**:
+        **Provide only the Builtin Guests and Administrator Groups with the SeCreatePageFile Privilege**:
 
-      ```ruby
-      windows_user_privilege 'Create Pagefile' do
-        privilege      'SeCreatePagefilePrivilege'
-        users          ['BUILTIN\\Guests', 'BUILTIN\\Administrators']
-        action         :set
-      end
-      ```
+        ```ruby
+        windows_user_privilege 'Create Pagefile' do
+          privilege      'SeCreatePagefilePrivilege'
+          users          ['BUILTIN\\Guests', 'BUILTIN\\Administrators']
+          action         :set
+        end
+        ```
 
-      **Remove the SeCreatePageFile Privilege from the Builtin Guests Group**:
+        **Remove the SeCreatePageFile Privilege from the Builtin Guests Group**:
 
-      ```ruby
-      windows_user_privilege 'Create Pagefile' do
-        privilege      'SeCreatePagefilePrivilege'
-        users          ['BUILTIN\\Guests']
-        action         :remove
-      end
-      ```
+        ```ruby
+        windows_user_privilege 'Create Pagefile' do
+          privilege      'SeCreatePagefilePrivilege'
+          users          ['BUILTIN\\Guests']
+          action         :remove
+        end
+        ```
 
-      **Clear all users from the SeDenyNetworkLogonRight Privilege**:
+        **Clear all users from the SeDenyNetworkLogonRight Privilege**:
 
-      ```ruby
-      windows_user_privilege 'Allow any user the Network Logon right' do
-        privilege      'SeDenyNetworkLogonRight'
-        action         :clear
-      end
-      ```
+        ```ruby
+        windows_user_privilege 'Allow any user the Network Logon right' do
+          privilege      'SeDenyNetworkLogonRight'
+          action         :clear
+        end
+        ```
       DOC
 
       PRIVILEGE_OPTS = %w{ SeAssignPrimaryTokenPrivilege

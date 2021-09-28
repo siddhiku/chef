@@ -26,33 +26,33 @@ class Chef
       provides :apt_package, target_mode: true
       provides :package, platform_family: "debian", target_mode: true
       examples <<~DOC
-      **Install a package using package manager**:
+        **Install a package using package manager**:
 
-      ```ruby
-      apt_package 'name of package' do
-        action :install
-      end
-      ```
+        ```ruby
+        apt_package 'name of package' do
+          action :install
+        end
+        ```
 
-      **Install a package without specifying the default action**:
+        **Install a package without specifying the default action**:
 
-      ```ruby
-      apt_package 'name of package'
-      ```
+        ```ruby
+        apt_package 'name of package'
+        ```
 
-      **Install multiple packages at once**:
+        **Install multiple packages at once**:
 
-      ```ruby
-      apt_package %(package1 package2 package3)
-      ```
+        ```ruby
+        apt_package %(package1 package2 package3)
+        ```
 
-      **Install without using recommend packages as a dependency**:
+        **Install without using recommend packages as a dependency**:
 
-      ```ruby
-      package 'apache2' do
-        options '--no-install-recommends'
-      end
-      ```
+        ```ruby
+        package 'apache2' do
+          options '--no-install-recommends'
+        end
+        ```
       DOC
 
       description "Use the **apt_package** resource to manage packages on Debian and Ubuntu platforms."

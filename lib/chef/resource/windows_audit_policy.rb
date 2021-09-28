@@ -91,36 +91,36 @@ class Chef
       introduced "16.2"
 
       examples <<~DOC
-      **Set Logon and Logoff policy to "Success and Failure"**:
+        **Set Logon and Logoff policy to "Success and Failure"**:
 
-      ```ruby
-      windows_audit_policy "Set Audit Policy for 'Logon and Logoff' actions to 'Success and Failure'" do
-        subcategory %w(Logon Logoff)
-        success true
-        failure true
-        action :set
-      end
-      ```
+        ```ruby
+        windows_audit_policy "Set Audit Policy for 'Logon and Logoff' actions to 'Success and Failure'" do
+          subcategory %w(Logon Logoff)
+          success true
+          failure true
+          action :set
+        end
+        ```
 
-      **Set Credential Validation policy to "Success"**:
+        **Set Credential Validation policy to "Success"**:
 
-      ```ruby
-      windows_audit_policy "Set Audit Policy for 'Credential Validation' actions to 'Success'" do
-        subcategory 'Credential Validation'
-        success true
-        failure false
-        action :set
-      end
-      ```
+        ```ruby
+        windows_audit_policy "Set Audit Policy for 'Credential Validation' actions to 'Success'" do
+          subcategory 'Credential Validation'
+          success true
+          failure false
+          action :set
+        end
+        ```
 
-      **Enable CrashOnAuditFail option**:
+        **Enable CrashOnAuditFail option**:
 
-      ```ruby
-      windows_audit_policy 'Enable CrashOnAuditFail option' do
-        crash_on_audit_fail true
-        action :set
-      end
-      ```
+        ```ruby
+        windows_audit_policy 'Enable CrashOnAuditFail option' do
+          crash_on_audit_fail true
+          action :set
+        end
+        ```
       DOC
 
       property :subcategory, [String, Array],

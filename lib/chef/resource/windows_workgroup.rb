@@ -28,20 +28,20 @@ class Chef
       description "Use the **windows_workgroup** resource to join or change the workgroup of a Windows host."
       introduced "14.5"
       examples <<~DOC
-      **Join a workgroup**:
+        **Join a workgroup**:
 
-      ```ruby
-      windows_workgroup 'myworkgroup'
-      ```
+        ```ruby
+        windows_workgroup 'myworkgroup'
+        ```
 
-      **Join a workgroup using a specific user**:
+        **Join a workgroup using a specific user**:
 
-      ```ruby
-      windows_workgroup 'myworkgroup' do
-        user 'Administrator'
-        password 'passw0rd'
-      end
-      ```
+        ```ruby
+        windows_workgroup 'myworkgroup' do
+          user 'Administrator'
+          password 'passw0rd'
+        end
+        ```
       DOC
 
       property :workgroup_name, String,
